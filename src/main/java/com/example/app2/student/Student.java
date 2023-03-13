@@ -1,7 +1,6 @@
 package com.example.app2.student;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -24,7 +23,7 @@ public class Student
    private String name;
    private String email;
    private LocalDate dob;
-   @Transient //age will be calculated first
+   @Transient //age will be calculated first from D.0.B.
    private Integer age;
 
    public Student()
@@ -85,8 +84,7 @@ public class Student
     }
 
     public Integer getAge() { //to calculate age from dob given
-
-        return Period.between(this.dob, LocalDate.now()).getYears();
+       return Period.between(this.dob, LocalDate.now()).getYears();
     }
 
     public void setAge(Integer age) {
@@ -100,7 +98,7 @@ public class Student
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", dob=" + dob +
-                ", age=" + age +
+               ", age=" + age +
                 '}';
     }
 }

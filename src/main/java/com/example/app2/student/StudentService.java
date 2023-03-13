@@ -1,21 +1,25 @@
 package com.example.app2.student;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 //*service layer carries the business logic*
 @Service //or @Component
 public class StudentService {
     private final StudentRepository studentRepository;
-     @Autowired
+
+    @Autowired
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
-     //*for a static data*
+    //*for a static data*
 //    public List<Student> getStudents()
 //    {
 //        return List.of(new Student(
@@ -25,16 +29,62 @@ public class StudentService {
 //                LocalDate.of(2011, Month.FEBRUARY,13),
 //                12
 //        ));
-//
-//
 //    }
 
     //*for dynamic data gotten from db*
-    public List<Student> getStudents()
-    {
+    public List<Student> getStudents() {
+
         return studentRepository.findAll();
     }
 
 
+    public void addNewStudent(Student student) {
+        Optional<Student> studentOptional = studentRepository
+                .findStudentByEmail(student.getEmail());
+        if (studentOptional.isPresent()) {
+            throw new IllegalStateException("email taken");
+        }
+        studentRepository.save(student);
+        // System.out.println(student);
+    }
 
+    public void deleteStudent(Long studentId) {
+        boolean exists = studentRepository.existsById(studentId);
+        if (!exists) {
+            throw new IllegalStateException(
+                    "student with id " + studentId + " does not exist");
+        }
+        studentRepository.deleteById(studentId);
+
+
+    }
+
+    @Transactional
+    public void updateStudent(Long studentId,
+                              String name,
+                              String email) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalStateException(
+                        "student with id " + studentId + " does not exist"
+        ));
+        if (name != null &&
+                name.length() > 0 &&
+                !Objects.equals(student.getName(), name))
+        {
+            student.setName(name);
+        }
+        if (email != null &&
+                email.length() > 0 &&
+                !Objects.equals(student.getEmail(), email))
+        {
+            Optional <Student> studentOptional = studentRepository
+                    .findStudentByEmail(email);
+            if (studentOptional.isPresent())
+            {
+                throw new IllegalStateException("email taken");
+            }
+            student.setEmail(email);
+        }
+
+    }
 }
